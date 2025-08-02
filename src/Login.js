@@ -1,9 +1,9 @@
 // Login.js
 import React, { useState } from 'react';
-import './Login.css';  // Optionally add styles for login form
+import './Login.css';
 
-const Login = ({ onLoginSuccess }) => {
-  const [username, setUsername] = useState('');
+const Login = ({ closeModal }) => {
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -11,58 +11,55 @@ const Login = ({ onLoginSuccess }) => {
   const handleLoginSubmit = (e) => {
     e.preventDefault();
 
-    // Basic validation
-    if (!username || !password) {
-      setError('Please enter both username and password');
+    if (!email || !password) {
+      setError('Please fill out both fields');
       return;
     }
 
-    setLoading(true); // Set loading state
+    setLoading(true);
     setError('');
 
-    // Simulate API call for login
     setTimeout(() => {
-      // Replace this logic with your actual authentication API call
-      if (username === 'admin' && password === 'password') {
-        // Simulate successful login
-        onLoginSuccess();
+      if (email === 'admin@example.com' && password === 'password') {
+        alert('Login successful');
+        closeModal(); // Close popup
       } else {
-        // Show error message on failed login
-        setError('Invalid username or password');
+        setError('Invalid email or password');
       }
-      setLoading(false); // Stop loading state
-    }, 2000); // Simulated API delay
+      setLoading(false);
+    }, 2000);
   };
 
   return (
-    <div className="login-container">
-      <h2>Login</h2>
-      <form onSubmit={handleLoginSubmit}>
-        <div className="form-group">
-          <label htmlFor="username">Username:</label>
-          <input
-            type="text"
-            id="username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="password">Password:</label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        <button type="submit" disabled={loading}>
-          {loading ? 'Logging in...' : 'Login'}
-        </button>
-        {error && <p className="error">{error}</p>}
-      </form>
+    <div className="login-modal">
+      <div className="modal-content">
+        <span className="close-btn" onClick={closeModal}>&times;</span>
+        <h2>Login</h2>
+        <form onSubmit={handleLoginSubmit}>
+          <div className="form-group">
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              placeholder="Enter your email"
+            />
+          </div>
+          <div className="form-group">
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              placeholder="Enter your password"
+            />
+          </div>
+          <button type="submit" disabled={loading}>
+            {loading ? 'Logging in...' : 'Login'}
+          </button>
+          {error && <p className="error">{error}</p>}
+        </form>
+      </div>
     </div>
   );
 };
