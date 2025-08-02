@@ -1,17 +1,15 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Home from './Home';
-import Login from './Login';  // Import Login page component
-import Signup from './Signup';  // Import Signup page component
+import StudentDetails from './StudentDetails';
 import './App.css';
 
 const App = () => {
   return (
-    <Router>  {/* Ensure everything is inside Router */}
+    <Router>
       <Routes>
-        <Route path="/" element={<Home />} /> {/* Home route */}
-        <Route path="/login" element={<Login />} /> {/* Login route */}
-        <Route path="/signup" element={<Signup />} /> {/* Signup route */}
+        <Route path="/" element={<Home />} />
+        <Route path="/student-details" element={<StudentDetails />} />
       </Routes>
     </Router>
   );

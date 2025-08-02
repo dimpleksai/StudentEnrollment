@@ -1,6 +1,8 @@
 // Signup.js
 import React, { useState } from 'react';
 import './Signup.css'; // Keep using your own CSS
+import { useNavigate } from 'react-router-dom';
+
 
 const Signup = ({ closeModal }) => {
   const [email, setEmail] = useState('');
@@ -8,6 +10,8 @@ const Signup = ({ closeModal }) => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
 
   const handleSignupSubmit = (e) => {
     e.preventDefault();
@@ -28,8 +32,10 @@ const Signup = ({ closeModal }) => {
     setTimeout(() => {
       alert('Signup successful');
       setLoading(false);
-      closeModal(); // Close modal on success
+      navigate('/student-details');  // 👈 Navigate to next page
+      closeModal();                  // 👈 Close modal after navigating
     }, 2000);
+    
   };
 
   return (
