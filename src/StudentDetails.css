@@ -1,12 +1,23 @@
 /* StudentDetails.css */
 
+.student-details-wrapper {
+  background-image: url('https://images.unsplash.com/photo-1571260899304-425eee4c7efc'); /* Must be inside public/ */
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
 .student-details-container {
   background-color: white;
-  padding: 20px;
-  margin: 40px auto;
+  padding: 30px;
   border-radius: 10px;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.2);
   width: 400px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .student-details-container h2 {
@@ -25,7 +36,7 @@
 }
 
 .student-details-container input {
-  width: 100%;
+  width: 95%;
   padding: 10px;
   border-radius: 5px;
   border: 1px solid #ccc;
