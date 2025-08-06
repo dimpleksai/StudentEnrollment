@@ -60,32 +60,32 @@
 
 .menu-button {
   font-size: 1.5rem;
-  background: none;
-  border: none;
+  background: green;
+  border: black;
   cursor: pointer;
   padding: 0.5rem 1rem;
 }
 
 .dropdown-menu {
-  background-color: white;
+  background-color: rgb(90, 50, 50);
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
   position: absolute;
   right: 0;
-  margin-top: 0.5rem;
-  border-radius: 6px;
+  margin-top: 0.9rem;
+  border-radius: 10px;
   z-index: 1000;
 }
 
 .dropdown-menu button {
   display: block;
   width: 100%;
-  padding: 0.75rem 1rem;
+  padding: 1rem 1rem;
   border: none;
-  background: white;
+  background: rgb(143, 135, 164);
   cursor: pointer;
-  text-align: left;
+  text-align: right;
 }
 
 .dropdown-menu button:hover {
-  background-color: #f0f0f0;
+  background-color: #020202;
 }

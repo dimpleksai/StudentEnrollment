@@ -1,6 +1,8 @@
 // StudentDashboard.js
 import React, { useState } from 'react';
 import './StudentDashboard.css';
+import { useNavigate } from 'react-router-dom';
+
 
 const StudentDashboard = () => {
   const student = {
@@ -17,43 +19,63 @@ const StudentDashboard = () => {
   };
 
   const [menuOpen, setMenuOpen] = useState(false);
+  const navigate = useNavigate();
+
   const handleSignOut = () => {
-    // Optional: clear session, localStorage, etc.
-    window.location.href = '/'; // redirect to home page
-    };
+    // Clear session/localStorage if needed
+    window.location.href = '/'; // redirect to home
+  };
 
-
-    const handleProfileClick = () => {
+  const handleProfileClick = () => {
     alert("Profile clicked (you can redirect to profile page)");
-    };
+  };
 
   return (
-    <div className="dashboard-container">
-      <header className="dashboard-header">
-        <h1>Welcome back, {student.name} 👋</h1>
-        <p>{student.email}</p>
-      </header>
+    <div className="dashboard-wrapper">
+      {/* 🟡 Menu Button at Top-Right */}
+      <div className="menu-container">
+        <button className="menu-button" onClick={() => setMenuOpen(!menuOpen)}>☰</button>
+        {menuOpen && (
+          <div className="dropdown-menu">
+            <button onClick={handleProfileClick}>👤 Profile</button>
+            <button onClick={handleSignOut}>🚪 SignOut</button>
+          </div>
+        )}
+      </div>
 
-      <section className="dashboard-section">
-        <h2>📚 Your Enrolled Courses</h2>
-        <div className="courses-list">
-          {student.enrolledCourses.map(course => (
-            <div className="course-card" key={course.id}>
-              <h3>{course.title}</h3>
-              <p>Instructor: {course.instructor}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+      {/* 🟢 Main Dashboard Content */}
+      <div className="dashboard-container">
+        <header className="dashboard-header">
+          <h1>Welcome back, {student.name} 👋</h1>
+          <p>{student.email}</p>
+        </header>
 
-      <section className="dashboard-section highlight-box">
-        <h2>📆 Next Class</h2>
-        <p><strong>{student.nextClass.course}</strong> at {student.nextClass.time}</p>
-      </section>
+        <section className="dashboard-section">
+          <h2>📚 Your Enrolled Courses</h2>
+          <div className="courses-list">
+            {student.enrolledCourses.map(course => (
+              <div className="course-card" key={course.id}>
+                <h3>{course.title}</h3>
+                <p>Instructor: {course.instructor}</p>
+              </div>
+            ))}
+          </div>
+        </section>
 
-      <section className="dashboard-section">
-        <button className="explore-btn">➕ Explore More Courses</button>
-      </section>
+        <section className="dashboard-section highlight-box">
+          <h2>📆 Next Class</h2>
+          <p><strong>{student.nextClass.course}</strong> at {student.nextClass.time}</p>
+        </section>
+
+        <section className="dashboard-section">
+          <button
+            className="explore-btn"
+            onClick={() => navigate('/course-listing')}
+              >
+              ➕ Explore More Courses
+          </button>
+        </section>
+      </div>
     </div>
   );
 };
