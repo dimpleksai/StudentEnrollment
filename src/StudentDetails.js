@@ -1,8 +1,12 @@
 // StudentDetails.js
 import React, { useState, useEffect } from 'react';
 import './StudentDetails.css';
+import { useNavigate } from 'react-router-dom';
+
 
 const StudentDetails = ({ email }) => {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     email: '',
     name: '',
@@ -25,11 +29,12 @@ const StudentDetails = ({ email }) => {
   };
 
   const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log('Submitted student data:', formData);
-    alert('Student details submitted!');
-    // Optionally send this data to backend API
-  };
+  e.preventDefault();
+  // Optional: validate or POST to backend here
+  console.log('Submitted student data:', formData);
+  // Redirect to login
+  navigate('/', { state: { openLogin: true } });  // Update this path based on your actual route
+};
 
   return (
     <div className="student-details-wrapper">
