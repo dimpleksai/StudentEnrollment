@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>React Login Page</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        background: url('logo.png') no-repeat center center fixed;
+        background-size: cover;
+        position: relative;
+      }
+
+      .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: rgba(255, 255, 255, 0.9); 
+        z-index: 0;
+      }
+
+      #root {
+        position: relative;
+        z-index: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="overlay"></div>
+    <div id="root"></div>
+  </body>
+</html>
