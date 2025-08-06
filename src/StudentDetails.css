@@ -1,0 +1,59 @@
+/* StudentDetails.css */
+
+.student-details-wrapper {
+  background-image: url('https://images.unsplash.com/photo-1571260899304-425eee4c7efc'); /* Must be inside public/ */
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.student-details-container {
+  background-color: white;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.2);
+  width: 400px;
+}
+
+.student-details-container h2 {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.student-details-container .form-group {
+  margin-bottom: 15px;
+}
+
+.student-details-container label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.student-details-container input {
+  width: 95%;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+.student-details-container button {
+  margin-top: 20px;
+  width: 100%;
+  padding: 10px;
+  background-color: #4CAF50;
+  color: white;
+  font-size: 1rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.student-details-container button:hover {
+  background-color: #45a049;
+}
