@@ -1,4 +1,5 @@
 // Login.js
+import { useNavigate } from 'react-router-dom';
 import React, { useState } from 'react';
 import './Login.css';
 
@@ -7,6 +8,8 @@ const Login = ({ closeModal }) => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const navigate = useNavigate();
 
   const handleLoginSubmit = (e) => {
     e.preventDefault();
@@ -23,6 +26,7 @@ const Login = ({ closeModal }) => {
       if (email === 'admin@example.com' && password === 'password') {
         alert('Login successful');
         closeModal(); // Close popup
+        navigate('/student-dashboard');
       } else {
         setError('Invalid email or password');
       }
