@@ -12,22 +12,21 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig {
 
-  @Bean
-  public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    http.csrf(csrf -> csrf.disable())
-        .headers(headers -> headers.frameOptions(frame -> frame.disable())) // Needed for H2 console
-        .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/api/auth/**", "/h2/**").permitAll()  // Allow H2 and APIs
-            .anyRequest().authenticated()  // Keep other endpoints secured
-        )
-        .httpBasic().disable()  // Disable basic authentication
-        .formLogin().disable();  // Disable the login form
+   @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+       http
+           .csrf(csrf -> csrf.disable())
+           .headers(headers -> headers.frameOptions(frame -> frame.disable())) // Needed for H2
+            .authorizeHttpRequests(auth -> auth
+               .requestMatchers("/api/auth/**", "/h2/**", "/h2-console/**").permitAll()
+                .anyRequest().authenticated()
+            );
+       return http.build(); // No formLogin(), no httpBasic()
+    }
 
-    return http.build();
-  }
-
-  @Bean
-  public PasswordEncoder passwordEncoder() {
-    return new BCryptPasswordEncoder();
-  }
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+       return new BCryptPasswordEncoder();
+    }
 }
+

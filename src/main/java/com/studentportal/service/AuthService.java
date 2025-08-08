@@ -1,44 +1,42 @@
-// package com.studentportal.service;
-// import org.springframework.beans.factory.annotation.Autowired;
-// import org.springframework.http.HttpStatus;
-// import org.springframework.http.ResponseEntity;
-// import org.springframework.security.crypto.password.PasswordEncoder;
-// import org.springframework.stereotype.Service;
+package com.studentportal.service;
 
-// import com.studentportal.model.JwtResponse;
-// import com.studentportal.model.LoginRequest;
-// import com.studentportal.model.SignupRequest;
-// import com.studentportal.model.User;
-// import com.studentportal.repository.UserRepository;
+import java.util.Optional;
 
-// @Service
-// public class AuthService {
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
-//   @Autowired private UserRepository repo;
-//   @Autowired private PasswordEncoder encoder;
+import org.springframework.beans.factory.annotation.Autowired;
+import com.studentportal.model.LoginRequest;
+import com.studentportal.model.SignupRequest;
+import com.studentportal.model.User;
+import com.studentportal.repository.UserRepository;
 
-//   public ResponseEntity<?> signup(SignupRequest req) {
-//     if (repo.existsByEmail(req.getEmail())) {
-//       return ResponseEntity.badRequest().body("Email already registered");
-//     }
+@Service
+public class AuthService {
 
-//     User user = new User();
-//     user.setName(req.getName());
-//     user.setEmail(req.getEmail());
-//     user.setPassword(encoder.encode(req.getPassword()));
-//     user.setRole("STUDENT");
+    @Autowired private UserRepository userRepository;
+    @Autowired private PasswordEncoder passwordEncoder;
 
-//     repo.save(user);
-//     return ResponseEntity.ok("Signup successful");
-//   }
+    public ResponseEntity<?> signup(SignupRequest req) {
+        if (userRepository.existsByEmail(req.getEmail())) {
+            return ResponseEntity.badRequest().body("Email already in use");
+        }
+        User u = new User();
+        u.setName(req.getName());
+        u.setEmail(req.getEmail());
+        u.setPassword(passwordEncoder.encode(req.getPassword()));
+        u.setRole(req.getRole());
+        userRepository.save(u);
+        return ResponseEntity.ok("User registered successfully");
+    }
 
-//   public ResponseEntity<?> login(LoginRequest req) {
-//     User user = repo.findByEmail(req.getEmail()).orElse(null);
-//     if (user == null || !encoder.matches(req.getPassword(), user.getPassword())) {
-//       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
-//     }
+    public ResponseEntity<?> login(LoginRequest req) {
+        Optional<User> u = userRepository.findByEmail(req.getEmail());
+        if (u.isEmpty() || !passwordEncoder.matches(req.getPassword(), u.get().getPassword())) {
+            return ResponseEntity.status(401).body("Invalid credentials");
+        }
+        return ResponseEntity.ok("Login successful");
+    }
+}
 
-//     String token = JwtUtil.generateToken(user); // Add JWT logic separately
-//     return ResponseEntity.ok(new JwtResponse());
-//   }
-// }

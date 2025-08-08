@@ -1,11 +1,15 @@
 package com.studentportal.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "users")  // optional, but helps avoid reserved-word issues
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class User {
 
     @Id
