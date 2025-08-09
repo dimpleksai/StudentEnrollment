@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.studentportal.model.LoginRequest;
 import com.studentportal.model.SignupRequest;
 import com.studentportal.model.User;
+import com.studentportal.model.UserResponse;
 import com.studentportal.repository.UserRepository;
 
 @Service
@@ -32,11 +33,32 @@ public class AuthService {
     }
 
     public ResponseEntity<?> login(LoginRequest req) {
-        Optional<User> u = userRepository.findByEmail(req.getEmail());
-        if (u.isEmpty() || !passwordEncoder.matches(req.getPassword(), u.get().getPassword())) {
-            return ResponseEntity.status(401).body("Invalid credentials");
-        }
-        return ResponseEntity.ok("Login successful");
+    // 1) Lookup by email
+    Optional<User> opt = userRepository.findByEmail(req.getEmail());
+    if (opt.isEmpty()) {
+        return ResponseEntity.status(401).body("Invalid credentials");
     }
+
+    User user = opt.get();
+
+    // 2) Verify raw password against stored BCrypt hash
+    boolean ok = passwordEncoder.matches(req.getPassword(), user.getPassword());
+    if (!ok) {
+        return ResponseEntity.status(401).body("Invalid credentials");
+    }
+
+    // 3) Return a sanitized payload (no password)
+    UserResponse payload = new UserResponse(
+            user.getId(),
+            user.getName(),
+            user.getEmail(),
+            user.getRole()
+    );
+    return ResponseEntity.ok(payload);
 }
+}
+
+
+
+
 
