@@ -8,11 +8,16 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SignupRequest {
-  private String name;
-  private String email;
-  private String password;
-  public String getRole() {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'getRole'");
-  }
+    private String name;
+    private String email;
+    private String password;
+    private String role;
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
 }
