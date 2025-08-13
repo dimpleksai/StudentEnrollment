@@ -58,7 +58,16 @@ public class Student {
   @Column(name = "updated_at", nullable = false)
   private Instant updatedAt;
 
-  // getters/setters
+  // ---- lifecycle to satisfy NOT NULL timestamps even if DB defaults missing
+  @PrePersist
+  public void onCreate() {
+    if (this.createdAt == null) this.createdAt = Instant.now();
+    this.updatedAt = Instant.now();
+  }
+  @PreUpdate
+  public void onUpdate() { this.updatedAt = Instant.now(); }
+
+  // ---- getters & setters
   public Long getId() { return id; }
   public void setId(Long id) { this.id = id; }
 

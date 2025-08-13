@@ -35,7 +35,10 @@ INSERT INTO courses (course_id, discipline, course_number) VALUES
 ('PHYS101', 'Physics', '101'),
 ('PHYS201', 'Physics', '201'),
 ('PHYS301', 'Physics', '301'),
-('PHYS401', 'Physics', '401');
+('PHYS401', 'Physics', '401')
+
+ON CONFLICT (course_id) DO NOTHING;
+
 
 -- Instructors
 INSERT INTO instructors (instructor_id, first_name, last_name, department, email, degree_institute, degree_type) VALUES
@@ -80,7 +83,10 @@ INSERT INTO instructors (instructor_id, first_name, last_name, department, email
 ('INST039','Dr. Emma','Phillips','Physics','emma.phillips@university.edu','MIT','PhD'),
 ('INST040','Dr. Ethan','Campbell','Physics','ethan.campbell@university.edu','Caltech','PhD'),
 ('INST041','Dr. Sophia','Parker','Physics','sophia.parker@university.edu','Harvard University','PhD'),
-('INST042','Dr. Mason','Evans','Physics','mason.evans@university.edu','Princeton','PhD');
+('INST042','Dr. Mason','Evans','Physics','mason.evans@university.edu','Princeton','PhD')
+
+ON CONFLICT (instructor_id) DO NOTHING;
+
 
 -- Students (password default = 'Student@123')
 INSERT INTO undergraduate_students
@@ -132,10 +138,12 @@ VALUES
 ('UG2024044','William','Stewart','william.stewart@university.edu','Freshman','English',3.48,'2024-08-28', crypt('Student@123', gen_salt('bf'))),
 ('UG2024045','Ava','Sanchez','ava.sanchez@university.edu','Freshman','Mathematics',3.67,'2024-08-30', crypt('Student@123', gen_salt('bf'))),
 ('UG2024046','Lucas','Morris','lucas.morris@university.edu','Freshman','Chemistry',3.39,'2024-09-02', crypt('Student@123', gen_salt('bf'))),
-('UG2024047','Mia','Rogers','mia.rogers@university.edu','Freshman','Physics',3.84,'2024-09-05', crypt('Student@123', gen_salt('bf'))),
+('UG2024047','Mia','Rogers','mia.rogers2@university.edu','Freshman','Physics',3.84,'2024-09-05', crypt('Student@123', gen_salt('bf'))),
 ('UG2024048','Alexander','Reed','alexander.reed@university.edu','Freshman','Art',3.52,'2024-09-08', crypt('Student@123', gen_salt('bf'))),
 ('UG2024049','Charlotte','Cook','charlotte.cook@university.edu','Freshman','History',3.76,'2024-09-10', crypt('Student@123', gen_salt('bf'))),
-('UG2024050','Benjamin','Morgan','benjamin.morgan@university.edu','Freshman','Political Science',3.31,'2024-09-12', crypt('Student@123', gen_salt('bf')));
+('UG2024050','Benjamin','Morgan','benjamin.morgan@university.edu','Freshman','Political Science',3.31,'2024-09-12', crypt('Student@123', gen_salt('bf')))
+
+ON CONFLICT (email) DO NOTHING;
 
 -- Sections
 INSERT INTO sections (section_id, course_id, semester, section_number, instructor_number) VALUES
@@ -180,7 +188,9 @@ INSERT INTO sections (section_id, course_id, semester, section_number, instructo
 ('PHYS101-001','PHYS101','Fall 2024','001','INST039'),
 ('PHYS201-001','PHYS201','Fall 2024','001','INST040'),
 ('PHYS301-001','PHYS301','Fall 2024','001','INST041'),
-('PHYS401-001','PHYS401','Fall 2024','001','INST042');
+('PHYS401-001','PHYS401','Fall 2024','001','INST042')
+
+ON CONFLICT (section_id) DO NOTHING;
 
 -- Rosters
 INSERT INTO rosters (section_id, student_number, enrollment_date, grade) VALUES
@@ -239,4 +249,6 @@ INSERT INTO rosters (section_id, student_number, enrollment_date, grade) VALUES
 ('PHYS101-001','UG2024047','2024-08-20','A-'),
 ('PHYS201-001','UG2023034','2024-08-18','B+'),
 ('PHYS301-001','UG2022021','2024-08-15','A-'),
-('PHYS401-001','UG2021009','2024-08-15','B+');
+('PHYS401-001','UG2021009','2024-08-15','B+')
+
+ON CONFLICT (section_id, student_number) DO NOTHING;
