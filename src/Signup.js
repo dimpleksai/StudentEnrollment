@@ -15,27 +15,38 @@ const Signup = ({ closeModal }) => {
 
   const handleSignupSubmit = (e) => {
     e.preventDefault();
-
+  
     if (!email || !password || !confirmPassword) {
       setError('Please fill out all fields');
       return;
     }
-
+  
+    // Gmail-only validation
+    const gmailRegex = /^[a-zA-Z0-9._%+-]+@(gmail\.com|yahoo\.com|outlook\.com)$/;
+    if (!gmailRegex.test(email)) {
+      setError('Gmail, Yahoo, or Outlook email addresses are allowed');
+      return;
+    }
+  
     if (password !== confirmPassword) {
       setError('Passwords do not match');
       return;
     }
-
+  
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters long');
+      return;
+    }
+  
     setLoading(true);
     setError('');
-
+  
     setTimeout(() => {
       alert('Signup successful');
       setLoading(false);
       navigate('/student-details');  // 👈 Navigate to next page
       closeModal();                  // 👈 Close modal after navigating
     }, 2000);
-    
   };
 
   return (
