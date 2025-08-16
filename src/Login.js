@@ -1,188 +1,118 @@
-// Login.js
-import { useNavigate } from 'react-router-dom';
+// src/Login.js
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Login.css';
+import { api } from './api';
 
-const allowedDomainsRegex = /^[a-zA-Z0-9._%+-]+@(gmail\.com|yahoo\.com|outlook\.com|example\.com)$/;
+const allowedDomainsRegex = /^[a-zA-Z0-9._%+-]+@(university\.edu)$/;
 
-const Login = ({ closeModal }) => {
+export default function Login({ closeModal }) {
+  const navigate = useNavigate();
   const [mode, setMode] = useState("login"); // "login" | "change"
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  // Change Password fields
+  // Change Password (UI kept but no backend yet)
   const [currentPwd, setCurrentPwd] = useState('');
   const [newPwd, setNewPwd] = useState('');
   const [confirmNewPwd, setConfirmNewPwd] = useState('');
 
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const navigate = useNavigate();
+  const [status, setStatus] = useState('');
+  const [busy, setBusy] = useState(false);
 
-  // --- LOGIN SUBMIT ---
-  const handleLoginSubmit = (e) => {
+  const validateEmail = (val) => allowedDomainsRegex.test(val);
+
+  async function handleLoginSubmit(e) {
     e.preventDefault();
-
+    setError(''); setStatus('');
     if (!email || !password) {
       setError('Please fill out both fields');
       return;
     }
     if (!allowedDomainsRegex.test(email)) {
-      setError('Only Gmail, Yahoo, or Outlook email addresses are allowed');
+      setError('university.edu addresses are allowed');
       return;
     }
     if (password.length < 6) {
       setError('Password must be at least 6 characters long');
       return;
+
     }
+    setBusy(true);
+    try {
+      const res = await api.login({ email, password });
+      setStatus(res.message || 'Login successful');
+      closeModal?.();
+      navigate('/student-dashboard');;
+    } catch (err) {
+      setError('Invalid email or password');
+    } finally {
+      setBusy(false);
+    } 
+  }
 
-    setLoading(true);
-    setError('');
-
-    setTimeout(() => {
-      if (email === 'admin@example.com' && password === 'password') {
-        alert('Login successful');
-        closeModal();
-        navigate('/student-dashboard');
-      } else {
-        setError('Invalid email or password');
-      }
-      setLoading(false);
-    }, 1200);
-  };
-
-  // --- CHANGE PASSWORD SUBMIT ---
-  const handleChangePasswordSubmit = (e) => {
+  function handleChangePasswordSubmit(e) {
     e.preventDefault();
+    setError('Change password API not available yet.');
 
-    if (!email || !currentPwd || !newPwd || !confirmNewPwd) {
-      setError('Please fill out all fields');
-      return;
-    }
-    if (!allowedDomainsRegex.test(email)) {
-      setError(' Gmail, Yahoo, or Outlook email addresses are allowed');
-      return;
-    }
-    if (newPwd.length < 6) {
-      setError('New password must be at least 6 characters long');
-      return;
-    }
-    if (newPwd !== confirmNewPwd) {
-      setError('New passwords do not match');
-      return;
-    }
-
-    setLoading(true);
-    setError('');
-
-    // Simulate API call to change password
-    setTimeout(() => {
-      // pretend current password is always "password"
-      if (currentPwd !== 'password') {
-        setError('Current password is incorrect');
-        setLoading(false);
-        return;
-      }
-      alert('Password changed successfully. You can now log in.');
-      // Reset change-password fields and go back to login view
-      setCurrentPwd(''); setNewPwd(''); setConfirmNewPwd('');
-      setMode('login');
-      setLoading(false);
-    }, 1200);
-  };
-
-  const switchToChange = () => { setError(''); setMode('change'); };
-  const backToLogin = () => { setError(''); setMode('login'); };
+    
+  }
 
   return (
-    <div className="login-modal">
-      <div className="modal-content">
-        <span className="close-btn" onClick={closeModal}>&times;</span>
+    <div className="modal-overlay">
+      <div className="modal">
+        <button className="close-btn" onClick={() => closeModal?.()}>×</button>
 
-        {mode === 'login' ? (
+        {mode === "login" ? (
           <>
-            <h2 className="modal-title">Login</h2>
-            <form onSubmit={handleLoginSubmit}>
-              <div className="form-group">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  placeholder="Enter your email"
-                />
+            <h2>Log in</h2>
+            <form onSubmit={handleLoginSubmit} className="form">
+              <div className="field">
+                <label>Email</label>
+                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" required />
               </div>
-              <div className="form-group">
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  placeholder="Enter your password"
-                />
-                {/* Forgot password link under the password field */}
-                <p className="forgot-password-link" onClick={switchToChange}>
-                  Change Password
-                </p>
+              <div className="field">
+                <label>Password</label>
+                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Your password" required />
               </div>
 
-              <button type="submit" disabled={loading}>
-                {loading ? 'Logging in...' : 'Login'}
-              </button>
+              <button type="submit" disabled={busy}>{busy ? 'Working...' : 'Log in'}</button>
 
+              <div className="alt-actions">
+                <button type="button" className="link" onClick={() => setMode("change")}>
+                  Forgot / Change password
+                </button>
+              </div>
+
+              {status && <p className="status">{status}</p>}
               {error && <p className="error">{error}</p>}
             </form>
           </>
         ) : (
           <>
-            <h2 className="modal-title">Change Password</h2>
-            <form onSubmit={handleChangePasswordSubmit}>
-            <div className="form-group">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  placeholder="Your account email" 
-                />
+            <h2>Change password</h2>
+            <form onSubmit={handleChangePasswordSubmit} className="form">
+              <div className="field">
+                <label>Email</label>
+                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
               </div>
-              <div className="form-group">
-                <input
-                  type="password"
-                  value={currentPwd}
-                  onChange={(e) => setCurrentPwd(e.target.value)}
-                  required
-                  placeholder="Current password"
-                />
+              <div className="field">
+                <label>Current password</label>
+                <input type="password" value={currentPwd} onChange={(e) => setCurrentPwd(e.target.value)} required />
               </div>
-              <div className="form-group">
-                <input
-                  type="password"
-                  value={newPwd}
-                  onChange={(e) => setNewPwd(e.target.value)}
-                  required
-                  placeholder="New password"
-                />
+              <div className="field">
+                <label>New password</label>
+                <input type="password" value={newPwd} onChange={(e) => setNewPwd(e.target.value)} required />
               </div>
-              <div className="form-group">
-                <input
-                  type="password"
-                  value={confirmNewPwd}
-                  onChange={(e) => setConfirmNewPwd(e.target.value)}
-                  required
-                  placeholder="Confirm new password"
-                />
+              <div className="field">
+                <label>Confirm new password</label>
+                <input type="password" value={confirmNewPwd} onChange={(e) => setConfirmNewPwd(e.target.value)} required />
               </div>
 
-              <button type="submit" disabled={loading}>
-                {loading ? 'Updating…' : 'Update Password'}
-              </button>
+              <button type="submit" disabled>Change password (coming soon)</button>
 
-              <button
-                type="button"
-                className="link-btn"
-                onClick={backToLogin}
-              >
+              <button type="button" className="link" onClick={() => setMode("login")}>
                 ← Back to Login
               </button>
 
@@ -193,6 +123,4 @@ const Login = ({ closeModal }) => {
       </div>
     </div>
   );
-};
-
-export default Login;
+}

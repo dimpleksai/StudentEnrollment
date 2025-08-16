@@ -1,98 +1,143 @@
-// Signup.js
-import React, { useState } from 'react';
-import './Signup.css'; // Keep using your own CSS
+// src/Signup.js
+import React, { useState } from "react";
 import { useNavigate } from 'react-router-dom';
+import './Signup.css';
 
 
 const Signup = ({ closeModal }) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState('');
+const navigate = useNavigate();
+const [error, setError] = useState("");
+
+const allowedEmailRegex = /^[A-Za-z0-9._%+-]+@university\.edu$/;
+
+
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirm: ""
+  });
+
+  const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
 
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
 
-  const handleSignupSubmit = (e) => {
+   const handleSubmit = async (e) => {
     e.preventDefault();
-  
-    if (!email || !password || !confirmPassword) {
-      setError('Please fill out all fields');
-      return;
-    }
-  
-    // Gmail-only validation
-    const gmailRegex = /^[a-zA-Z0-9._%+-]+@(gmail\.com|yahoo\.com|outlook\.com)$/;
-    if (!gmailRegex.test(email)) {
-      setError('Gmail, Yahoo, or Outlook email addresses are allowed');
-      return;
-    }
-  
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
-  
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters long');
-      return;
-    }
-  
-    setLoading(true);
-    setError('');
-  
-    setTimeout(() => {
-      alert('Signup successful');
+
+      if (!formData.name || !formData.email || !formData.password || !formData.confirm) {
+       setError('Please fill out all fields');
+       return;
+     }
+        if (!allowedEmailRegex.test(formData.email)) {
+       setError('Only university.edu email addresses are allowed');
+       return;
+     }
+      if (formData.password !== formData.confirm) {
+       setError('Passwords do not match');
+       return;
+     }
+      if (formData.password.length < 6) {
+       setError('Password must be at least 6 characters');
+       return;
+     }
+
+     setLoading(true);
+     setStatus("");
+
+    try {
+      const res = await fetch("http://localhost:8081/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password
+        })
+      });
+
+      if (res.ok) {
+        setStatus("Signup successful!");
+        closeModal?.();                    // close the overlay
++       navigate('/student-details');  
+      } else {
+        const data = await res.json();
+        setStatus(data.message || "Signup failed.");
+      }
+    } catch (err) {
+      console.error(err);
+      setStatus("An error occurred during signup.");
+    } finally {
       setLoading(false);
-      navigate('/student-details');  // 👈 Navigate to next page
-      closeModal();                  // 👈 Close modal after navigating
-    }, 2000);
+    }
   };
 
   return (
-    <div className="signup-modal">
-      <div className="modal-content">
-        <span className="close-btn" onClick={closeModal}>×</span>
-        <h2>Signup</h2>
-        <form onSubmit={handleSignupSubmit}>
-          <div className="form-group">
+    <div className="modal-overlay">
+      <div className="modal">
+        <button className="close-btn" onClick={() => closeModal?.()}>×</button>
+        <h2>Sign up</h2>
+        <form onSubmit={handleSubmit} className="form">
+          <div className="field">
+            <label>Full name</label>
+            <input
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              placeholder="Jane Doe"
+              required
+            />
+          </div>
+          <div className="field">
+            <label>Email</label>
             <input
               type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="you@example.com"
               required
-              placeholder="Enter your email"
             />
           </div>
-          <div className="form-group">
+          <div className="field">
+            <label>Password</label>
             <input
               type="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="Password"
               required
-              placeholder="Enter your password"
             />
           </div>
-          <div className="form-group">
+          <div className="field">
+            <label>Confirm password</label>
             <input
               type="password"
-              id="confirmPassword"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
+              name="confirm"
+              value={formData.confirm}
+              onChange={handleChange}
+              placeholder="Confirm password"
               required
-              placeholder="Confirm your password"
             />
           </div>
+
           <button type="submit" disabled={loading}>
-            {loading ? 'Signing up...' : 'Signup'}
+            {loading ? "Signing up..." : "Create account"}
           </button>
-          {error && <p className="error">{error}</p>}
+
+          {status && <p className="status">{status}</p>}
         </form>
       </div>
     </div>
   );
 };
 
+// ✅ default export so Home.js can import it
 export default Signup;
