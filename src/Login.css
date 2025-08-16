@@ -1,129 +1,63 @@
-/* Login.css */
-.login-container {
-  background-color: white;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  width: 300px;
-  margin: 0 auto;
-}
-
-.login-container h2 {
-  margin-bottom: 20px;
-  text-align: center;
-}
-
-.form-group {
-  margin-bottom: 15px;
-}
-
-.form-group label {
-  display: block;
-  font-size: 1rem;
-  margin-bottom: 5px;
-}
-
-.form-group input {
-  width: 90%;
-  padding: 10px;
-  font-size: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-}
-
-button {
-  width: 100%;
-  padding: 10px;
-  background-color: #4CAF50;
-  color: white;
-  font-size: 1rem;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-button:disabled {
-  background-color: #ccc;
-}
-
-button:hover:not(:disabled) {
-  background-color: #45a049;
-}
-
-.error {
-  color: red;
-  font-size: 0.9rem;
-  margin-top: 10px;
-}
-
-
-/* LoginModal.css */
-.login-modal {
+/* Overlay */
+.modal-overlay {
+  position: fixed;   /* sit on top of everything */
+  inset: 0;          /* top:0 right:0 bottom:0 left:0 */
+  background: rgba(0,0,0,0.45);
   display: flex;
-  justify-content: center;
   align-items: center;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5); /* Transparent black background */
-  z-index: 1000; /* Modal overlay */
+  justify-content: center;
+  z-index: 9999;     /* <- key: above hero/nav/etc */
 }
 
-.modal-content {
-  background-color: white;
+/* Dialog */
+.modal {
+  background: #fff;
+  width: 95%;
+  max-width: 480px;
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.25);
   padding: 20px;
-  border-radius: 10px;
-  width: 300px;
-  text-align: center;
   position: relative;
-  z-index: 1010; /* Ensure modal content is above overlay */
 }
 
+/* Close button */
 .close-btn {
-  position: absolute;
-  top: 10px;
+  position: right;
+  top: 8px;
   right: 10px;
-  font-size: 1.5rem;
+  background: transparent;
+  border: 0;
+  font-size: 22px;
   cursor: pointer;
 }
 
-form {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-form input {
-  width: 100%;
+/* Form */
+.form { display: grid; gap: 12px; }
+.field { display: grid; gap: 6px; }
+.field input {
   padding: 10px;
-  font-size: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  background-color: #f9f9f9; /* Light background color for the input fields */
+  border: 1px solid #cfcfcf;
+  border-radius: 8px;
+  font-size: 14px;
 }
-
-button {
-  padding: 10px;
-  background-color: #4CAF50;
-  color: white;
-  font-size: 1rem;
-  border: none;
-  border-radius: 5px;
+button[type="submit"] {
+  padding: 10px 12px;
+  border: 1px solid #333;
+  border-radius: 8px;
+  background: #1367d1;
+  color: #fff;
   cursor: pointer;
 }
+button[disabled] { opacity: 0.6; cursor: not-allowed; }
 
-button:disabled {
-  background-color: #ccc;
-}
+.status { color: #0a7d2a; margin-top: 6px; }
+.error  { color: #b00020; margin-top: 6px; }
 
-button:hover:not(:disabled) {
-  background-color: #45a049;
-}
-
-.error {
-  color: red;
-  font-size: 0.9rem;
-  margin-top: 10px;
+.link {
+  background: none;
+  border: 0;
+  color: #1367d1;
+  text-decoration: underline;
+  padding: 0;
+  cursor: pointer;
 }
