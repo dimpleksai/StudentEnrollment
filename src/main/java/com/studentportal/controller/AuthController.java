@@ -1,6 +1,7 @@
 package com.studentportal.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.ResponseCookie;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -11,7 +12,10 @@ import com.studentportal.repository.UserRepository;
 import com.studentportal.service.AuthService;
 
 import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Map;
 import java.util.Optional;
@@ -70,5 +74,32 @@ public class AuthController {
                 )))
                 .orElseGet(() -> ResponseEntity.status(404)
                         .body(Map.of("status", "error", "message", "User not found")));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Map<String, String>> logout(
+            HttpServletRequest request,
+            HttpServletResponse response) {
+
+        // Invalidate server-side session
+        var session = request.getSession(false);
+        if (session != null) {
+            session.invalidate();
+        }
+
+        // Clear Spring Security context
+        SecurityContextHolder.clearContext();
+
+        // Expire JSESSIONID cookie
+        ResponseCookie expired = ResponseCookie.from("JSESSIONID", "")
+                .path("/")
+                .httpOnly(true)
+                .secure(false)   // set true if using HTTPS in production
+                .sameSite("Lax")
+                .maxAge(0)
+                .build();
+        response.addHeader("Set-Cookie", expired.toString());
+
+        return ResponseEntity.ok(Map.of("status", "success", "message", "Logout successful"));
     }
 }
