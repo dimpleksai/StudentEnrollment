@@ -18,123 +18,124 @@ import java.util.concurrent.ThreadLocalRandom;
 @Service
 public class AuthService {
 
-  private static final Logger log = LoggerFactory.getLogger(AuthService.class);
+    private static final Logger log = LoggerFactory.getLogger(AuthService.class);
 
-  private final StudentRepository students;
-  private final PasswordEncoder encoder;
+    private final StudentRepository students;
+    private final PasswordEncoder encoder;
 
-  public AuthService(StudentRepository students, PasswordEncoder encoder) {
-    this.students = students;
-    this.encoder = encoder;
-  }
-
-  // ---------- Public API ----------
-
-  /**
-   * Registers a new student account.
-   * Populates all schema-required fields and hashes the password.
-   * Throws IllegalStateException if email is already registered.
-   */
-  @Transactional
-  public void signup(String name, String email, String rawPassword) {
-    email = normalizeEmail(email);
-
-    if (email == null || email.isBlank()) {
-      throw new IllegalArgumentException("Email is required");
-    }
-    if (rawPassword == null || rawPassword.isBlank()) {
-      throw new IllegalArgumentException("Password is required");
-    }
-    if (students.existsByEmail(email)) {
-      throw new IllegalStateException("Email already registered");
+    public AuthService(StudentRepository students, PasswordEncoder encoder) {
+        this.students = students;
+        this.encoder = encoder;
     }
 
-    String[] parts = splitName(name);
-    String first = parts[0];
-    String last  = parts[1];
+    // ---------- Public API ----------
 
-    Student s = new Student();
-    s.setFirstName(first);
-    s.setLastName(last);
-    s.setEmail(email);
+    /** Registers a new student account. */
+    @Transactional
+    public void signup(String name, String email, String rawPassword) {
+        email = normalizeEmail(email);
 
-    // Required by schema
-    s.setStudentNumber(generateUniqueStudentNumber());
-    s.setClassification("Freshman");       // default; adjust if your UI collects a value
-    s.setAdmissionDate(LocalDate.now());   // default today
-    s.setEnrollmentStatus("Active");       // optional; matches DB default
-    s.setPasswordHash(encoder.encode(rawPassword));
-    s.setEmailVerified(false);
+        if (email == null || email.isBlank()) {
+            throw new IllegalArgumentException("Email is required");
+        }
+        if (rawPassword == null || rawPassword.isBlank()) {
+            throw new IllegalArgumentException("Password is required");
+        }
+        if (students.existsByEmail(email)) {
+            throw new IllegalStateException("Email already registered");
+        }
 
-    // Optional fields (null allowed)
-    s.setMajor(null);
-    s.setGpa(null);
+        String[] parts = splitName(name);
+        String first = parts[0];
+        String last  = parts[1];
 
-    students.save(s);
-    log.info("Created student: email={}, studentNumber={}", email, s.getStudentNumber());
-  }
+        Student s = new Student();
+        s.setFirstName(first);
+        s.setLastName(last);
+        s.setEmail(email);
 
-  /**
-   * Verifies credentials. Throws NoSuchElementException on invalid login.
-   * On success, returns the Student (so the controller can mint a JWT or build a profile).
-   */
-  @Transactional(readOnly = true)
-  public Student verifyLogin(String email, String rawPassword) {
-    email = normalizeEmail(email);
+        // Required by schema
+        s.setStudentNumber(generateUniqueStudentNumber());
+        s.setClassification("Freshman");
+        s.setAdmissionDate(LocalDate.now());
+        s.setEnrollmentStatus("Active");
+        s.setPasswordHash(encoder.encode(rawPassword));
+        s.setEmailVerified(false);
 
-    Student s = students.findByEmail(email)
-        .orElseThrow(() -> new NoSuchElementException("Invalid credentials"));
+        // Optional
+        s.setMajor(null);
+        s.setGpa(null);
 
-    if (!encoder.matches(rawPassword, s.getPasswordHash())) {
-      throw new NoSuchElementException("Invalid credentials");
+        students.save(s);
+        log.info("Created student: email={}, studentNumber={}", email, s.getStudentNumber());
     }
-    return s;
-  }
 
-  // ---------- Helpers ----------
+    /** Verifies login credentials. */
+    @Transactional(readOnly = true)
+    public Student verifyLogin(String email, String rawPassword) {
+        email = normalizeEmail(email);
 
-  private String normalizeEmail(String email) {
-    return (email == null) ? null : email.trim().toLowerCase(Locale.ROOT);
-  }
+        Student s = students.findByEmail(email)
+            .orElseThrow(() -> new NoSuchElementException("Invalid credentials"));
 
-  /**
-   * Split a full name into first/last. Fallbacks ensure NOT NULL columns are satisfied.
-   * "Alice Smith" -> ["Alice", "Smith"]
-   * "Alice"       -> ["Alice", "Student"]
-   * null/blank    -> ["Student", "User"]
-   */
-  private String[] splitName(String name) {
-    if (name == null || name.isBlank()) {
-      return new String[]{"Student", "User"};
+        if (!encoder.matches(rawPassword, s.getPasswordHash())) {
+            throw new NoSuchElementException("Invalid credentials");
+        }
+        return s;
     }
-    String trimmed = name.trim().replaceAll("\\s+", " ");
-    int i = trimmed.indexOf(' ');
-    if (i < 0) return new String[]{ trimmed, "Student" };
-    String first = trimmed.substring(0, i);
-    String last  = trimmed.substring(i + 1);
-    if (last.isBlank()) last = "Student";
-    return new String[]{ first, last };
-  }
 
-  /**
-   * Generate a unique student number like "UG2025####".
-   * Retries a few times to avoid the UNIQUE constraint on (student_number).
-   */
-  private String generateUniqueStudentNumber() {
-    final String year = String.valueOf(Year.now().getValue());
-    for (int attempt = 0; attempt < 8; attempt++) {
-      String seq = String.format("%04d", ThreadLocalRandom.current().nextInt(0, 10000));
-      String candidate = "UG" + year + seq;
-      Optional<Student> existing = students.findByStudentNumber(candidate);
-      if (existing.isEmpty()) {
+    /** Updates password for the logged-in user. */
+    @Transactional
+    public void updatePassword(String email, String oldPassword, String newPassword) {
+        log.info("Changing password for email: {}", email);
+
+        email = normalizeEmail(email);
+
+        Student s = students.findByEmail(email)
+            .orElseThrow(() -> new NoSuchElementException("User not found"));
+
+        if (!encoder.matches(oldPassword, s.getPasswordHash())) {
+            throw new IllegalArgumentException("Old password is incorrect");
+        }
+
+        s.setPasswordHash(encoder.encode(newPassword));
+        students.save(s);
+        log.info("Password updated for user={}", email);
+    }
+
+    // ---------- Helpers ----------
+
+    private String normalizeEmail(String email) {
+        return (email == null) ? null : email.trim().toLowerCase(Locale.ROOT);
+    }
+
+    private String[] splitName(String name) {
+        if (name == null || name.isBlank()) {
+            return new String[]{"Student", "User"};
+        }
+        String trimmed = name.trim().replaceAll("\\s+", " ");
+        int i = trimmed.indexOf(' ');
+        if (i < 0) return new String[]{ trimmed, "Student" };
+        String first = trimmed.substring(0, i);
+        String last  = trimmed.substring(i + 1);
+        if (last.isBlank()) last = "Student";
+        return new String[]{ first, last };
+    }
+
+    private String generateUniqueStudentNumber() {
+        final String year = String.valueOf(Year.now().getValue());
+        for (int attempt = 0; attempt < 8; attempt++) {
+            String seq = String.format("%04d", ThreadLocalRandom.current().nextInt(0, 10000));
+            String candidate = "UG" + year + seq;
+            Optional<Student> existing = students.findByStudentNumber(candidate);
+            if (existing.isEmpty()) {
+                return candidate;
+            }
+            log.warn("Collision on student_number={}, retrying (attempt {} of 8)", candidate, attempt + 1);
+        }
+        String seq = String.format("%06d", ThreadLocalRandom.current().nextInt(0, 1_000_000));
+        String candidate = "UG" + year + seq;
+        log.warn("Using extended-range student_number={}", candidate);
         return candidate;
-      }
-      log.warn("Collision on student_number={}, retrying (attempt {} of 8)", candidate, attempt + 1);
     }
-    // Extremely unlikely to happen; if it does, fall back to a wider range
-    String seq = String.format("%06d", ThreadLocalRandom.current().nextInt(0, 1_000_000));
-    String candidate = "UG" + year + seq;
-    log.warn("Using extended-range student_number={}", candidate);
-    return candidate;
-  }
 }
