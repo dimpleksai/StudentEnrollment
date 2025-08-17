@@ -2,7 +2,10 @@ name: Build and Deploy Frontend
 
 on:
   push:
-    branches: -frontend
+    branches:
+      - dev
+      - uat
+      - prod
 
 jobs:
   build:
@@ -22,3 +25,14 @@ jobs:
 
       - name: Build frontend
         run: npm run build
+
+      - name: Deploy to Netlify
+        run: |
+          curl -sL https://github.com/netlify/cli/releases/download/v3.24.0/netlify-cli-linux-x64.tar.gz | tar xz -C /usr/local/bin
+          netlify deploy --prod --dir=build --token ${{ secrets.NETLIFY_TOKEN }}
+        env:
+          NETLIFY_TOKEN: ${{ secrets.NETLIFY_TOKEN }} # Netlify token stored in GitHub Secrets
+
+    environment:
+      name: ${{ github.ref }} # Automatically uses dev/uat/prod branches
+      url: ${{ steps.deploy.outputs.url }} # Optionally, link to deployment URL

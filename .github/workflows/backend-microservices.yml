@@ -2,7 +2,10 @@ name: Build and Deploy Enrollment and Repository microservices
 
 on:
   push:
-    branches: -backend
+    branches:
+      - dev
+      - uat
+      - prod
 
 jobs:
   build:
@@ -28,3 +31,34 @@ jobs:
 
       - name: Build maven
         run: mvn clean install
+
+      - name: Deploy to Heroku
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+          HEROKU_APP_NAME_DEV: ${{ secrets.HEROKU_APP_NAME_DEV }}
+          HEROKU_APP_NAME_UAT: ${{ secrets.HEROKU_APP_NAME_UAT }}
+          HEROKU_APP_NAME_PROD: ${{ secrets.HEROKU_APP_NAME_PROD }}
+        run: |
+          # Log in to Heroku
+          echo $HEROKU_API_KEY | heroku auth:token
+
+          # Deploy to the appropriate Heroku environment
+          if [[ "${GITHUB_REF##*/}" == "dev" ]]; then
+            echo "Deploying to DEV environment"
+            heroku git:remote -a $HEROKU_APP_NAME_DEV
+            git push heroku main
+          elif [[ "${GITHUB_REF##*/}" == "uat" ]]; then
+            echo "Deploying to UAT environment"
+            heroku git:remote -a $HEROKU_APP_NAME_UAT
+            git push heroku main
+          elif [[ "${GITHUB_REF##*/}" == "prod" ]]; then
+            echo "Deploying to PROD environment"
+            heroku git:remote -a $HEROKU_APP_NAME_PROD
+            git push heroku main
+          else
+            echo "Unknown branch, skipping deployment"
+            exit 1
+          fi
+
+    environment:
+      name: ${{ github.ref }} # Automatically deploy to the corresponding environment (dev/uat/prod)
