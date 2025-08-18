@@ -30,6 +30,7 @@ public class SecurityConfig {
         .authorizeHttpRequests(auth -> auth
             .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()   // CORS preflight
             .requestMatchers("/api/auth/**").permitAll()              // signup/login/change-password
+            .requestMatchers("/api/students").permitAll()         // public student profile access
             .anyRequest().authenticated()
         );
     // If you add JWT later, set stateless sessions and add your filter here.
