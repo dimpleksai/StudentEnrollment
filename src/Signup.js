@@ -65,7 +65,8 @@ const allowedEmailRegex = /^[A-Za-z0-9._%+-]+@university\.edu$/;
       if (res.ok) {
         setStatus("Signup successful!");
         closeModal?.();                    // close the overlay
-+       navigate('/student-details');  
+        sessionStorage.setItem("signupEmail", formData.email);
+        navigate('/student-details', { state: { email: formData.email } });  
       } else {
         const data = await res.json();
         setStatus(data.message || "Signup failed.");
