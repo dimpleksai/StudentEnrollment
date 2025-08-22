@@ -3,12 +3,18 @@ package com.example.student_enrollment_api.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 
 @Entity
 @Table(name = "undergraduate_students")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Student {
 
   @Id
@@ -64,49 +70,9 @@ public class Student {
     if (this.createdAt == null) this.createdAt = Instant.now();
     this.updatedAt = Instant.now();
   }
+
   @PreUpdate
-  public void onUpdate() { this.updatedAt = Instant.now(); }
-
-  // ---- getters & setters
-  public Long getId() { return id; }
-  public void setId(Long id) { this.id = id; }
-
-  public String getStudentNumber() { return studentNumber; }
-  public void setStudentNumber(String studentNumber) { this.studentNumber = studentNumber; }
-
-  public String getFirstName() { return firstName; }
-  public void setFirstName(String firstName) { this.firstName = firstName; }
-
-  public String getLastName() { return lastName; }
-  public void setLastName(String lastName) { this.lastName = lastName; }
-
-  public String getEmail() { return email; }
-  public void setEmail(String email) { this.email = email; }
-
-  public String getClassification() { return classification; }
-  public void setClassification(String classification) { this.classification = classification; }
-
-  public String getMajor() { return major; }
-  public void setMajor(String major) { this.major = major; }
-
-  public BigDecimal getGpa() { return gpa; }
-  public void setGpa(BigDecimal gpa) { this.gpa = gpa; }
-
-  public String getEnrollmentStatus() { return enrollmentStatus; }
-  public void setEnrollmentStatus(String enrollmentStatus) { this.enrollmentStatus = enrollmentStatus; }
-
-  public LocalDate getAdmissionDate() { return admissionDate; }
-  public void setAdmissionDate(LocalDate admissionDate) { this.admissionDate = admissionDate; }
-
-  public String getPasswordHash() { return passwordHash; }
-  public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
-
-  public boolean isEmailVerified() { return emailVerified; }
-  public void setEmailVerified(boolean emailVerified) { this.emailVerified = emailVerified; }
-
-  public Instant getCreatedAt() { return createdAt; }
-  public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
-
-  public Instant getUpdatedAt() { return updatedAt; }
-  public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }
+  public void onUpdate() { 
+    this.updatedAt = Instant.now(); 
+  }
 }
