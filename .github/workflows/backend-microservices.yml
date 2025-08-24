@@ -1,0 +1,38 @@
+name: Build and Deploy Backend
+
+on:
+  push:
+    branches:
+      - backend
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: Cache Maven packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-maven-
+
+      - name: Build backend
+        run: mvn clean package -DskipTests
+
+      - name: Deploy to Heroku
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+          HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME_BACKEND }}
+        run: |
+          echo $HEROKU_API_KEY | heroku auth:token
+          heroku git:remote -a $HEROKU_APP_NAME
+          git push heroku HEAD:main --force
