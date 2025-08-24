@@ -1,0 +1,39 @@
+name: Build and Deploy Frontend
+
+on:
+  push:
+    branches:
+      - frontend
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Prepare Heroku deploy
+        run: |
+          mkdir -p heroku-dist
+          cp -R build/* heroku-dist/
+          echo "node_modules" > .slugignore
+
+      - name: Deploy to Heroku
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+          HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME_FRONTEND }}
+        run: |
+          echo $HEROKU_API_KEY | heroku auth:token
+          heroku git:remote -a $HEROKU_APP_NAME
+          git push heroku HEAD:main --force
