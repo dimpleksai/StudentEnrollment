@@ -1,11 +1,9 @@
-name: Build and Deploy Enrollment and Repository microservices
+name: Build and Deploy Backend
 
 on:
   push:
     branches:
-      - dev
-      - uat
-      - prod
+      - backend
 
 jobs:
   build:
@@ -23,42 +21,18 @@ jobs:
       - name: Cache Maven packages
         uses: actions/cache@v3
         with:
-          path: |
-            ~/.m2/repository
+          path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
+          restore-keys: ${{ runner.os }}-maven-
 
-      - name: Build maven
-        run: mvn clean install
+      - name: Build backend
+        run: mvn clean package -DskipTests
 
       - name: Deploy to Heroku
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-          HEROKU_APP_NAME_DEV: ${{ secrets.HEROKU_APP_NAME_DEV }}
-          HEROKU_APP_NAME_UAT: ${{ secrets.HEROKU_APP_NAME_UAT }}
-          HEROKU_APP_NAME_PROD: ${{ secrets.HEROKU_APP_NAME_PROD }}
+          HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME_BACKEND }}
         run: |
-          # Log in to Heroku
           echo $HEROKU_API_KEY | heroku auth:token
-
-          # Deploy to the appropriate Heroku environment
-          if [[ "${GITHUB_REF##*/}" == "dev" ]]; then
-            echo "Deploying to DEV environment"
-            heroku git:remote -a $HEROKU_APP_NAME_DEV
-            git push heroku main
-          elif [[ "${GITHUB_REF##*/}" == "uat" ]]; then
-            echo "Deploying to UAT environment"
-            heroku git:remote -a $HEROKU_APP_NAME_UAT
-            git push heroku main
-          elif [[ "${GITHUB_REF##*/}" == "prod" ]]; then
-            echo "Deploying to PROD environment"
-            heroku git:remote -a $HEROKU_APP_NAME_PROD
-            git push heroku main
-          else
-            echo "Unknown branch, skipping deployment"
-            exit 1
-          fi
-
-    environment:
-      name: ${{ github.ref }} # Automatically deploy to the corresponding environment (dev/uat/prod)
+          heroku git:remote -a $HEROKU_APP_NAME
+          git push heroku HEAD:main --force
