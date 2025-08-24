@@ -3,16 +3,13 @@ name: Build and Deploy Frontend
 on:
   push:
     branches:
-      - dev
-      - uat
-      - prod
+      - frontend
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout Code
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Setup Node.js
@@ -21,18 +18,22 @@ jobs:
           node-version: 18
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Build frontend
         run: npm run build
 
-      - name: Deploy to Netlify
+      - name: Prepare Heroku deploy
         run: |
-          curl -sL https://github.com/netlify/cli/releases/download/v3.24.0/netlify-cli-linux-x64.tar.gz | tar xz -C /usr/local/bin
-          netlify deploy --prod --dir=build --token ${{ secrets.NETLIFY_TOKEN }}
-        env:
-          NETLIFY_TOKEN: ${{ secrets.NETLIFY_TOKEN }} # Netlify token stored in GitHub Secrets
+          mkdir -p heroku-dist
+          cp -R build/* heroku-dist/
+          echo "node_modules" > .slugignore
 
-    environment:
-      name: ${{ github.ref }} # Automatically uses dev/uat/prod branches
-      url: ${{ steps.deploy.outputs.url }} # Optionally, link to deployment URL
+      - name: Deploy to Heroku
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+          HEROKU_APP_NAME: ${{ secrets.HEROKU_APP_NAME_FRONTEND }}
+        run: |
+          echo $HEROKU_API_KEY | heroku auth:token
+          heroku git:remote -a $HEROKU_APP_NAME
+          git push heroku HEAD:main --force
